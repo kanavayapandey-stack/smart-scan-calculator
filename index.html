@@ -9,12 +9,12 @@
   <style>
     body {
       font-family: 'Montserrat', sans-serif;
-      background: linear-gradient(135deg, #f9f9f9, #dfe9f3);
+      background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
       margin: 0;
       padding: 0;
     }
     header {
-      background: linear-gradient(90deg, #2a5298, #1e3c72);
+      background: linear-gradient(90deg, #0984e3, #2d3436);
       color: white;
       text-align: center;
       padding: 20px;
@@ -28,23 +28,12 @@
       padding: 30px 20px;
     }
     h2 {
-      color: #1e3c72;
+      color: #0984e3;
       margin-bottom: 10px;
     }
     p {
-      color: #333;
+      color: #2d3436;
       font-size: 1rem;
-    }
-    .cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 25px;
-    }
-    .card {
-      background: white;
-      border-radius: 18px;
-      padding: 20px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
     }
     .split {
       display: grid;
@@ -52,8 +41,14 @@
       gap: 25px;
       margin-top: 20px;
     }
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
     .btn {
-      background: linear-gradient(90deg, #1e3c72, #2a5298);
+      background: linear-gradient(90deg, #0984e3, #00b894);
       border: none;
       color: white;
       padding: 12px 18px;
@@ -71,7 +66,7 @@
       border-radius: 6px;
       cursor: pointer;
     }
-    .preset-buttons button:hover { background: #dfe9f3; }
+    .preset-buttons button:hover { background: #dfe6e9; }
     #emoji {
       font-size: 60px;
       margin-top: 10px;
@@ -86,7 +81,7 @@
     }
     .jar {
       height: 180px;
-      border: 3px solid #1e3c72;
+      border: 3px solid #0984e3;
       border-radius: 12px;
       position: relative;
       overflow: hidden;
@@ -97,15 +92,14 @@
       bottom: 0;
       width: 100%;
       height: 0%;
-      transition: height 2s;
+      transition: height 1.5s ease-in-out;
     }
-    .jar:nth-child(1) .fill { background: #ff7675; }
-    .jar:nth-child(2) .fill { background: #ffeaa7; }
-    .jar:nth-child(3) .fill { background: #55efc4; }
+    .jar:nth-child(1) .fill { background: linear-gradient(180deg, #ff7675, #d63031); }
+    .jar:nth-child(2) .fill { background: linear-gradient(180deg, #ffeaa7, #fdcb6e); }
+    .jar:nth-child(3) .fill { background: linear-gradient(180deg, #55efc4, #00b894); }
 
     /* Responsive */
     @media (max-width: 980px) {
-      .cards { grid-template-columns: 1fr; }
       .split { grid-template-columns: 1fr; }
       .jars { grid-template-columns: 1fr; }
     }
@@ -140,15 +134,15 @@
     <h2>The 3 Jars of Money</h2>
     <div class="jars">
       <div>
-        <div class="jar"><div class="fill" style="height:40%"></div></div>
+        <div class="jar"><div class="fill" id="jarSpend"></div></div>
         <p>Spending</p>
       </div>
       <div>
-        <div class="jar"><div class="fill" style="height:60%"></div></div>
+        <div class="jar"><div class="fill" id="jarSave"></div></div>
         <p>Saving</p>
       </div>
       <div>
-        <div class="jar"><div class="fill" style="height:80%"></div></div>
+        <div class="jar"><div class="fill" id="jarWealth"></div></div>
         <p>Wealth</p>
       </div>
     </div>
@@ -199,7 +193,7 @@
     </div>
   </section>
 
-  <footer style="text-align:center; padding:20px; margin-top:30px; background:#f1f1f1; color:#333;">
+  <footer style="text-align:center; padding:20px; margin-top:30px; background:#0984e3; color:white; font-weight:bold;">
     Smart Scan | CBSE Skill Expo | DPSG
   </footer>
 
@@ -228,7 +222,7 @@
 
       document.getElementById("message").innerHTML = 
         type === "spend" 
-        ? `If you invested instead of spending <b>₹${yearly.toLocaleString('en-IN')}</b> yearly, in ${years} years you'd have <span style="color:#2a5298">₹${future.toLocaleString('en-IN')}</span>.`
+        ? `If you invested instead of spending <b>₹${yearly.toLocaleString('en-IN')}</b> yearly, in ${years} years you'd have <span style="color:#0984e3">₹${future.toLocaleString('en-IN')}</span>.`
         : `Your saving of <b>₹${yearly.toLocaleString('en-IN')}</b> yearly will grow to <span style="color:#00b894">₹${future.toLocaleString('en-IN')}</span> in ${years} years!`;
 
       document.getElementById("emoji").innerText = type === "spend" ? "🤔" : "🎉";
@@ -253,12 +247,21 @@
           labels: ["Yearly", `After ${years} yrs`],
           datasets: [{
             data: [yearly, future],
-            backgroundColor: type === "spend" ? ["#ff7675","#55efc4"] : ["#74b9ff","#ffeaa7"],
+            backgroundColor: type === "spend" ? ["#ff7675","#00b894"] : ["#0984e3","#fdcb6e"],
             borderRadius: 8
           }]
         },
         options: { responsive: true, plugins: { legend: { display:false } }, scales: { y: { beginAtZero: true } } }
       });
+
+      // Update Jars dynamically
+      let spendPct = type === "spend" ? 80 : 20;
+      let savePct = type === "save" ? 60 : 30;
+      let wealthPct = Math.min(100, (future/yearly/years) * 10);
+
+      document.getElementById("jarSpend").style.height = spendPct+"%";
+      document.getElementById("jarSave").style.height = savePct+"%";
+      document.getElementById("jarWealth").style.height = wealthPct+"%";
     }
 
     // Prefill from QR code (URL params)
