@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Smart Scan — Expense to Wealth</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --navy-1:#071A52;
+      --navy-2:#0B4C6B;
+      --card-bg:#ffffff;
+      --muted:#6b7280;
+      --accent:#00D4B8;
+      --accent2:#FF8C42;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Poppins',system-ui,Arial,sans-serif;background: linear-gradient(135deg,var(--navy-1),var(--navy-2));color:#0b2940;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:28px 12px}
+    .topbar{width:100%;max-width:1100px;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;background:rgba(255,255,255,0.06);border-radius:10px;color:rgba(255,255,255,0.95);box-shadow: 0 8px 30px rgba(2,6,23,0.28);margin-bottom:20px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .brand .logo{width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#04323a;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,0.25);font-size:18px}
+    .brand h1{margin:0;font-size:1.2rem;color:#fff}
+    main{width:100%;max-width:1100px}
+    .layout{display:grid;grid-template-columns: 1fr 420px;gap:20px;margin-top:20px}
+    @media (max-width:980px){ .layout{ grid-template-columns: 1fr; } }
+    .card{background:var(--card-bg);border-radius:12px;padding:18px;box-shadow: 0 8px 26px rgba(2,6,23,0.12)}
+    .form { display:flex; flex-direction:column; gap:10px; margin-top:12px }
+    label{font-weight:600;color:#0b2940}
+    input, select {padding:11px 12px; border-radius:10px; border:1px solid #e6eef8;font-size:1rem; outline:none; background:#fff}
+    .row {display:flex;gap:10px;align-items:center}
+    .range-row { display:flex; align-items:center; gap:12px }
+    .range-row input[type="range"]{ flex:1 }
+    .btn {padding:14px; border-radius:10px; border:none; cursor:pointer; font-weight:700;color:#063047; background:linear-gradient(90deg,var(--accent),var(--accent2));box-shadow: 0 10px 24px rgba(3,18,40,0.12); width:100%; text-align:center; }
+    #chartCard { padding:14px; text-align:center }
+    #resultCanvas { width:100% !important; height:300px !important; display:block }
+    .message { font-weight:700; margin-top:10px }
+    .subnote { font-weight:500; font-size:0.95rem; color:#333; margin-top:6px }
+    .emoji { font-size:2rem }
+    footer{ margin-top:30px; color:#fff; opacity:0.9; text-align:center; font-size:0.95rem }
+    .presets{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+    .preset-btn{padding:8px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);background:#fbfbfe;cursor:pointer;font-weight:600}
+    /* 3 Jar Animation */
+    .jars{display:flex;gap:20px;justify-content:center;margin-top:20px}
+    .jar{width:90px;height:140px;border-radius:12px;position:relative;overflow:hidden;background:#f4f7fb;border:1px solid rgba(0,0,0,0.06)}
+    .fill{position:absolute;left:0;bottom:0;width:100%;height:0;transition:height 900ms ease}
+    .jar .label{position:absolute;bottom:8px;width:100%;text-align:center;font-weight:700;color:#0b2940}
+    .jar.spend .fill{background:linear-gradient(180deg,#ffd3c6,#ffad61)}
+    .jar.save .fill{background:linear-gradient(180deg,#d6fff0,#55efc4)}
+    .jar.invest .fill{background:linear-gradient(180deg,#cfe8ff,#74b9ff)}
+    .coin{width:18px;height:18px;background:gold;border-radius:50%;position:absolute;left:50%;transform:translateX(-50%);top:-24px;opacity:0;animation:dropCoin 900ms forwards}
+    @keyframes dropCoin{0%{top:-24px;opacity:1}80%{top:90px;opacity:1}100%{top:110px;opacity:0}}
+    .about-card{margin-top:20px;padding:18px;background:#fff;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.15);text-align:center}
+    .about-card h3{margin-top:0;color:#0b2940}
+    .about-card p{margin:6px 0;color:#333;line-height:1.5}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand"><div class="logo">₹</div><h1>Smart Scan</h1></div>
+  </div>
+  <main>
+    <div class="about-card">
+      <h3>About Smart Scan</h3>
+      <p><b>Smart Scan</b> helps students see how small everyday expenses can grow into wealth if saved or invested. Use the presets for quick examples (Chips, Movie, Canteen, Coffee).</p>
+    </div>
+
+    <div class="layout">
+      <div>
+        <div class="card">
+          <h3>Expense to Wealth Calculator</h3>
+          <div class="form">
+            <label for="type">Choose Mode</label>
+            <select id="type" onchange="toggleForm()">
+              <option value="spend" selected>Spending</option>
+              <option value="save">Saving</option>
+            </select>
+
+            <div id="spendFields">
+              <div class="row" style="gap:8px;align-items:center">
+                <div style="flex:1">
+                  <label>Expense Title</label>
+                  <input type="text" id="title" value="Coffee ☕">
+                </div>
+                <div style="width:140px">
+                  <label>Amount (₹)</label>
+                  <input type="number" id="amount" value="60">
+                </div>
+                <div style="width:140px">
+                  <label>Frequency</label>
+                  <select id="freq">
+                    <option value="365">Daily</option>
+                    <option value="52">Weekly</option>
+                    <option value="12">Monthly</option>
+                    <option value="1">Yearly</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div id="saveFields" style="display:none;">
+              <label>Saving Goal</label>
+              <input type="text" id="saveTitle" value="College Fund 🎓">
+              <label>Amount (₹)</label>
+              <input type="number" id="saveAmount" value="50000">
+              <label>Frequency</label>
+              <select id="saveFreq">
+                <option value="1">Yearly</option>
+                <option value="12">Monthly</option>
+                <option value="52">Weekly</option>
+                <option value="365">Daily</option>
+              </select>
+            </div>
+
+            <div class="range-row">
+              <label>Years: <span id="yearLabel">10</span></label>
+              <input type="range" id="years" min="1" max="50" value="10" oninput="document.getElementById('yearLabel').innerText=this.value">
+            </div>
+
+            <div style="margin-top:10px">
+              <button class="btn" onclick="calculate()">Calculate</button>
+            </div>
+
+            <div style="margin-top:10px">
+              <label>Presets</label>
+              <div class="presets" id="presets">
+                <button class="preset-btn" onclick="applyPreset('Chips',10,365,10)">Chips ₹10 Daily</button>
+                <button class="preset-btn" onclick="applyPreset('Cold Drink',25,365,10)">Cold Drink ₹25 Daily</button>
+                <button class="preset-btn" onclick="applyPreset('Movie',300,12,10)">Movie ₹300 Monthly</button>
+                <button class="preset-btn" onclick="applyPreset('Canteen',150,12,10)">Canteen ₹150 Monthly</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div id="chartCard" class="card">
+        <div id="chartWrap" style="height:320px;">
+          <canvas id="resultCanvas"></canvas>
+        </div>
+        <div id="message" class="message"></div>
+        <div id="subnote" class="subnote"></div>
+        <div id="emoji" class="emoji"></div>
+
+        <div class="jars" style="margin-top:12px">
+          <div class="jar spend" id="jar1"><div class="fill"></div><div class="label">Spend</div></div>
+          <div class="jar save" id="jar2"><div class="fill"></div><div class="label">Save</div></div>
+          <div class="jar invest" id="jar3"><div class="fill"></div><div class="label">Invest</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-card">
+      <h3>Our Motive</h3>
+      <p>The goal of <b>Smart Scan</b> is to spread financial awareness among students. We want you to understand how even the smallest expenses, if redirected into savings or investments, can grow into significant wealth over time. Learn, plan, and take control of your financial future.</p>
+    </div>
+  </main>
+  <footer>Smart Scan | CBSE Skill Expo | DPSG</footer>
+
+  <script>
+    // --- Utility helpers ---
+    function formatINR(n){ return Math.round(n).toLocaleString('en-IN'); }
+
+    function toggleForm() {
+      const type = document.getElementById("type").value;
+      document.getElementById("spendFields").style.display = type === "spend" ? "block" : "none";
+      document.getElementById("saveFields").style.display = type === "save" ? "block" : "none";
+    }
+
+    function applyPreset(title, amount, freq, years){
+      document.getElementById("type").value = "spend";
+      toggleForm();
+      document.getElementById("title").value = title;
+      document.getElementById("amount").value = amount;
+      document.getElementById("freq").value = freq;
+      document.getElementById("years").value = years || 10;
+      document.getElementById('yearLabel').innerText = document.getElementById('years').value;
+      calculate();
+    }
+
+    // Chart
+    let chart;
+    const rate = 0.07; // annual
+
+    function calculate() {
+      const type = document.getElementById("type").value;
+      const years = parseInt(document.getElementById("years").value) || 0;
+      let amount = 0, freq = 1;
+      if (type === "spend"){
+        amount = parseFloat(document.getElementById("amount").value) || 0;
+        freq = parseInt(document.getElementById("freq").value) || 1;
+      } else {
+        amount = parseFloat(document.getElementById("saveAmount").value) || 0;
+        freq = parseInt(document.getElementById("saveFreq").value) || 1;
+      }
+
+      // periods per year
+      let periodsPerYear = (freq === 365 ? 365 : freq === 52 ? 52 : freq === 12 ? 12 : 1);
+      let periodLabel = periodsPerYear === 365 ? 'daily' : periodsPerYear === 52 ? 'weekly' : periodsPerYear === 12 ? 'monthly' : 'yearly';
+
+      const n = years * periodsPerYear;
+
+      // total contributed (simple) = amount * periods_per_year * years
+      const totalContributed = amount * n;
+
+      // future value with compound interest (ordinary annuity)
+      let futureValue = 0;
+      if (periodsPerYear <= 0 || !isFinite(n)) {
+        futureValue = totalContributed;
+      } else {
+        const periodRate = Math.pow(1 + rate, 1 / periodsPerYear) - 1;
+        if (Math.abs(periodRate) < 1e-12) futureValue = totalContributed;
+        else futureValue = amount * ((Math.pow(1 + periodRate, n) - 1) / periodRate);
+      }
+
+      // Update textual output: show both total contributed (simple) and future value (with interest)
+      document.getElementById('message').innerHTML = `<div>Total contributed over <b>${years}</b> years: ₹${formatINR(totalContributed)}</div><div style="margin-top:6px">Future value at <b>7% p.a.</b>: ₹${formatINR(futureValue)}</div>`;
+      document.getElementById('subnote').innerText = `Calculation: ${amount} × ${periodsPerYear} × ${years} = ${formatINR(totalContributed)} (simple contribution). Future value uses compound interest.`;
+      document.getElementById('emoji').innerText = type === 'spend' ? '🤔' : '🎉';
+
+      // Draw chart (two bars)
+      const ctx = document.getElementById('resultCanvas').getContext('2d');
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Total contributed','Future value'],
+          datasets: [{
+            label: '₹',
+            data: [totalContributed, Math.round(futureValue)],
+            backgroundColor: ['#ffd1c1','#cfe8ff'],
+            borderRadius: 8
+          }]
+        },
+        options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+      });
+
+      // Trigger jar animation (visual only)
+      animateJars(totalContributed, futureValue);
+    }
+
+    function animateJars(total, future){
+      // We'll animate fixed illustrative percentages: Spend 30%, Save 50%, Invest 20%
+      const fills = document.querySelectorAll('.jar .fill');
+      const percents = [30,50,20];
+      fills.forEach((fill,i)=>{
+        fill.style.height = '0%';
+      });
+      // small stagger
+      setTimeout(()=>{
+        fills.forEach((fill,i)=>{
+          setTimeout(()=>{ fill.style.height = percents[i] + '%';
+            // add coin effect
+            const coin = document.createElement('div'); coin.className = 'coin';
+            fill.parentElement.appendChild(coin);
+            setTimeout(()=> coin.remove(), 1000);
+          }, i*220);
+        });
+      },120);
+    }
+
+    // init
+    window.onload = ()=>{ toggleForm(); };
+  </script>
+</body>
+</html>
