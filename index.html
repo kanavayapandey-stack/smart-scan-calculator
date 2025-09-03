@@ -111,7 +111,7 @@
     .message { font-weight:700; margin-top:10px; }
     .emoji { font-size:2rem; }
     footer{ margin-top:30px; color:#fff; opacity:0.9; text-align:center; font-size:0.95rem; }
-    .url-box{ margin-top:10px; word-wrap:break-word; font-size:0.9rem; color:#333; }
+    .url-box{ margin-top:10px; word-wrap:break-word; font-size:0.9rem; color:#333; background:#f9f9f9; padding:6px; border-radius:6px;}
   </style>
 </head>
 <body>
@@ -191,31 +191,6 @@
       document.getElementById("saveFields").style.display = type === "save" ? "block" : "none";
     }
 
-    function getParams() {
-      const urlParams = new URLSearchParams(window.location.search);
-      return Object.fromEntries(urlParams.entries());
-    }
-
-    function prefillFromQR() {
-      const p = getParams();
-      if (p.type) document.getElementById("type").value = p.type;
-      toggleForm();
-      if (p.type === "spend") {
-        if (p.title) document.getElementById("title").value = decodeURIComponent(p.title);
-        if (p.amount) document.getElementById("amount").value = p.amount;
-        if (p.freq) document.getElementById("freq").value = p.freq;
-      } else if (p.type === "save") {
-        if (p.title) document.getElementById("saveTitle").value = decodeURIComponent(p.title);
-        if (p.amount) document.getElementById("saveAmount").value = p.amount;
-        if (p.freq) document.getElementById("saveFreq").value = p.freq;
-      }
-      if (p.years) {
-        document.getElementById("years").value = p.years;
-        document.getElementById("yearLabel").innerText = p.years;
-      }
-      if (p.type) calculate(); // auto run
-    }
-
     function calculate() {
       const type = document.getElementById("type").value;
       const years = parseInt(document.getElementById("years").value);
@@ -268,6 +243,34 @@
       });
     }
 
+    function getParams() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return Object.fromEntries(urlParams.entries());
+    }
+
+    function prefillFromQR() {
+      const p = getParams();
+      if (p.type) document.getElementById("type").value = p.type;
+      toggleForm();
+
+      if (p.type === "spend") {
+        if (p.title) document.getElementById("title").value = decodeURIComponent(p.title);
+        if (p.amount) document.getElementById("amount").value = p.amount;
+        if (p.freq) document.getElementById("freq").value = p.freq;
+      } else if (p.type === "save") {
+        if (p.title) document.getElementById("saveTitle").value = decodeURIComponent(p.title);
+        if (p.amount) document.getElementById("saveAmount").value = p.amount;
+        if (p.freq) document.getElementById("saveFreq").value = p.freq;
+      }
+
+      if (p.years) {
+        document.getElementById("years").value = p.years;
+        document.getElementById("yearLabel").innerText = p.years;
+      }
+
+      if (p.type) calculate(); // auto run
+    }
+
     function buildUrl() {
       const type = document.getElementById("type").value;
       const years = document.getElementById("years").value;
@@ -277,19 +280,3 @@
       } else {
         url += `&title=${encodeURIComponent(document.getElementById("saveTitle").value)}&amount=${document.getElementById("saveAmount").value}&freq=${document.getElementById("saveFreq").value}`;
       }
-      return url;
-    }
-
-    function showUrl() {
-      document.getElementById("shareUrl").innerText = buildUrl();
-    }
-
-    function copyUrl() {
-      navigator.clipboard.writeText(buildUrl());
-      alert("URL copied! Paste it into any QR generator.");
-    }
-
-    window.onload = prefillFromQR;
-  </script>
-</body>
-</html>
