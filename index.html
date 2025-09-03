@@ -1,359 +1,281 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Smart Scan — Expense to Wealth</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-  :root{
-    --bg1:#0f2027; --bg2:#203a43; --bg3:#2c5364;
-    --card:#ffffff; --ink:#0b2940; --muted:#667085;
-    --accent:#00D4B8; --accent2:#FF8C42;
-    --pill:#eef2f7;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0; font-family:'Poppins',system-ui,Arial,sans-serif; color:#fff;
-    background: linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
-  }
-  .wrap{max-width:1180px;margin:24px auto;padding:0 18px}
-  .topbar{
-    display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;
-    background:rgba(255,255,255,0.06);box-shadow:0 8px 26px rgba(2,6,23,0.28);
-  }
-  .logo{
-    width:46px;height:46px;border-radius:10px;display:grid;place-items:center;
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    color:#04323a;font-weight:800;box-shadow:0 8px 22px rgba(0,0,0,.25)
-  }
-  h1{font-size:1.3rem;margin:0}
-  .section{margin-top:18px;padding:18px;border-radius:12px;background:rgba(255,255,255,0.06)}
-  .section h2{margin:0 0 6px 0}
-  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:10px}
-  .card{
-    background:var(--card); color:var(--ink); border-radius:14px; padding:18px;
-    box-shadow:0 10px 28px rgba(3,18,40,.18);
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Scan | Expense to Wealth</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(135deg, #f9f9f9, #dfe9f3);
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: linear-gradient(90deg, #2a5298, #1e3c72);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 1.6rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    section {
+      max-width: 1100px;
+      margin: auto;
+      padding: 30px 20px;
+    }
+    h2 {
+      color: #1e3c72;
+      margin-bottom: 10px;
+    }
+    p {
+      color: #333;
+      font-size: 1rem;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+    }
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      margin-top: 20px;
+    }
+    .btn {
+      background: linear-gradient(90deg, #1e3c72, #2a5298);
+      border: none;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 12px;
+    }
+    .btn:hover { opacity: 0.9; }
+    .preset-buttons button {
+      margin: 5px;
+      background: #f1f1f1;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .preset-buttons button:hover { background: #dfe9f3; }
+    #emoji {
+      font-size: 60px;
+      margin-top: 10px;
+      text-align: center;
+    }
+    /* Jars */
+    .jars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      text-align: center;
+    }
+    .jar {
+      height: 180px;
+      border: 3px solid #1e3c72;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      background: #f9f9f9;
+    }
+    .fill {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 0%;
+      transition: height 2s;
+    }
+    .jar:nth-child(1) .fill { background: #ff7675; }
+    .jar:nth-child(2) .fill { background: #ffeaa7; }
+    .jar:nth-child(3) .fill { background: #55efc4; }
 
-  /* Three Jars */
-  .jars{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-  .jar{
-    height:190px;border:4px solid rgba(255,255,255,.75);border-radius:18px 18px 12px 12px;
-    position:relative;overflow:hidden;background:rgba(255,255,255,.08);backdrop-filter: blur(2px);
-  }
-  .fill{
-    position:absolute;left:0;right:0;bottom:0;height:0%;
-    background:linear-gradient(0deg,rgba(255,255,255,.25),transparent);
-  }
-  .jar-title{margin-top:6px;text-align:center;font-weight:700}
-  .fill.spend{background:linear-gradient(0deg,#ff9f80,#ffdccf)}
-  .fill.short{background:linear-gradient(0deg,#ffe08a,#fff1c6)}
-  .fill.long{background:linear-gradient(0deg,#6debd6,#d7fff8)}
-  .jar-animate{animation:fillUp 2.2s ease forwards}
-  @keyframes fillUp {from{height:0%} to{height:80%}}
-
-  /* Calculator split layout */
-  .split{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:18px}
-  @media(max-width:980px){ .cards{grid-template-columns:1fr}; .jars{grid-template-columns:1fr}; .split{grid-template-columns:1fr} }
-
-  label{font-weight:600;color:var(--ink)}
-  input,select{width:100%;padding:10px 12px;margin-top:6px;border:1px solid #e7eef7;border-radius:10px;font-size:1rem}
-  .row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px}
-  .slider{width:100%}
-  .btn{
-    margin-top:14px;width:100%;padding:12px;border:none;border-radius:12px;cursor:pointer;
-    color:#083046;font-weight:800;letter-spacing:.2px;font-size:1rem;
-    background:linear-gradient(90deg,var(--accent),var(--accent2));
-    box-shadow:0 12px 24px rgba(2,6,23,.2);
-  }
-  .presets{margin-top:14px}
-  .pill{
-    display:inline-block;margin:6px 6px 0 0;padding:8px 12px;border-radius:999px;background:var(--pill);
-    border:1px solid #e6edf7;color:#0b2940;cursor:pointer;font-weight:600
-  }
-
-  .results h3{margin:0 0 8px 0}
-  #resultCanvas{width:100%;height:320px}
-  .center{text-align:center}
-  .calc{margin-top:10px;font-size:.96rem;color:#1b2a3b}
-  footer{margin:24px 0;color:#e8ecf1;text-align:center;opacity:.9}
-</style>
+    /* Responsive */
+    @media (max-width: 980px) {
+      .cards { grid-template-columns: 1fr; }
+      .split { grid-template-columns: 1fr; }
+      .jars { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      body { font-size: 15px; }
+      h1 { font-size: 1.2rem; }
+      .card { padding: 14px; }
+      input, select, .btn { font-size: 0.9rem; padding: 9px 10px; }
+      #resultCanvas { height: 220px !important; }
+      .jars { gap: 12px; }
+      .jar { height: 140px; }
+    }
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <!-- Brand -->
-    <div class="topbar">
-      <div class="logo">₹</div>
-      <h1>Smart Scan — Expense to Wealth</h1>
-    </div>
+  <header>💰 Smart Scan — Expense to Wealth</header>
 
-    <!-- About + Motive -->
-    <div class="section">
-      <h2>About</h2>
-      <p style="opacity:.95">Smart Scan helps students see how small everyday expenses can grow into wealth if saved or invested. Scan a preset QR, or type your own habit, and watch the numbers and chart update instantly.</p>
-    </div>
-    <div class="section">
-      <h2>Motive</h2>
-      <div class="cards">
-        <div class="card"><b>Make money visible</b><br/>We turn ₹10/day into a 10-year picture using compound interest so decisions feel real.</div>
-        <div class="card"><b>Learn by scanning</b><br/>Printed QR cards auto-fill the calculator—perfect for a quick, interactive expo demo.</div>
-        <div class="card"><b>Choose better</b><br/>Compare “spend vs save” in seconds and build teen-friendly habits that last.</div>
+  <!-- About -->
+  <section>
+    <h2>About</h2>
+    <p>Smart Scan is an interactive financial literacy tool for teens. It shows how small daily expenses, when saved and invested, can turn into wealth over time.</p>
+  </section>
+
+  <!-- Motive -->
+  <section>
+    <h2>Our Motive</h2>
+    <p>We want to inspire young people to think wisely about money. Each choice—whether spending or saving—shapes their financial future.</p>
+  </section>
+
+  <!-- Jars -->
+  <section>
+    <h2>The 3 Jars of Money</h2>
+    <div class="jars">
+      <div>
+        <div class="jar"><div class="fill" style="height:40%"></div></div>
+        <p>Spending</p>
+      </div>
+      <div>
+        <div class="jar"><div class="fill" style="height:60%"></div></div>
+        <p>Saving</p>
+      </div>
+      <div>
+        <div class="jar"><div class="fill" style="height:80%"></div></div>
+        <p>Wealth</p>
       </div>
     </div>
+  </section>
 
-    <!-- Three Jars Animation -->
-    <div class="section">
-      <h2>3-Jar Money Map</h2>
-      <div class="jars" id="jarGrid">
-        <div>
-          <div class="jar"><div class="fill spend"></div></div>
-          <div class="jar-title">Today • Spend</div>
-        </div>
-        <div>
-          <div class="jar"><div class="fill short"></div></div>
-          <div class="jar-title">Short-term • Save</div>
-        </div>
-        <div>
-          <div class="jar"><div class="fill long"></div></div>
-          <div class="jar-title">Future • Wealth</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Calculator & Chart -->
+  <!-- Calculator -->
+  <section>
+    <h2>Expense to Wealth Calculator</h2>
     <div class="split">
       <!-- Left: Form -->
       <div class="card">
-        <h2 style="margin:0 0 8px 0;color:var(--ink)">Expense to Wealth Calculator</h2>
-
-        <label>Choose Mode</label>
-        <select id="type" onchange="toggleForm()">
-          <option value="spend" selected>Spending</option>
+        <label>Mode:</label>
+        <select id="type">
+          <option value="spend">Spending</option>
           <option value="save">Saving</option>
-        </select>
+        </select><br><br>
 
-        <div id="spendFields">
-          <label>Expense Title</label>
-          <input id="title" type="text" value="Coffee ☕">
-          <div class="row">
-            <div>
-              <label>Amount (₹)</label>
-              <input id="amount" type="number" value="60" min="0">
-            </div>
-            <div>
-              <label>Frequency</label>
-              <select id="freq">
-                <option value="365">Daily</option>
-                <option value="52">Weekly</option>
-                <option value="12">Monthly</option>
-                <option value="1">Yearly</option>
-              </select>
-            </div>
-            <div>
-              <label>Years: <span id="yearLabel">10</span></label>
-              <input id="years" class="slider" type="range" min="1" max="50" value="10"
-                     oninput="document.getElementById('yearLabel').innerText=this.value">
-            </div>
-          </div>
-        </div>
+        <label>Title:</label>
+        <input id="title" type="text" value="Coffee ☕" /><br><br>
 
-        <div id="saveFields" style="display:none">
-          <label>Saving Goal</label>
-          <input id="saveTitle" type="text" value="College Fund 🎓">
-          <div class="row">
-            <div>
-              <label>Yearly Saving (₹)</label>
-              <input id="saveAmount" type="number" value="50000" min="0">
-            </div>
-            <div>
-              <label>Assume Yearly</label>
-              <select disabled><option>Yearly</option></select>
-            </div>
-            <div>
-              <label>Years: <span id="yearLabelSave">10</span></label>
-              <input id="yearsSave" class="slider" type="range" min="1" max="50" value="10"
-                     oninput="document.getElementById('yearLabelSave').innerText=this.value; document.getElementById('years').value=this.value; document.getElementById('yearLabel').innerText=this.value">
-            </div>
-          </div>
-        </div>
+        <label>Amount (₹):</label>
+        <input id="amount" type="number" value="60" /><br><br>
+
+        <label>Frequency (days/year):</label>
+        <input id="freq" type="number" value="365" /><br><br>
+
+        <label>Years:</label>
+        <input id="years" type="range" min="1" max="50" value="25" oninput="document.getElementById('yrsLabel').innerText=this.value" />
+        <span id="yrsLabel">25</span> years<br><br>
 
         <button class="btn" onclick="calculate()">Calculate</button>
 
-        <div class="presets">
-          <div style="font-weight:700;color:var(--ink);margin-top:4px">Presets</div>
-          <span class="pill" onclick="applyPreset('Chips ₹10 Daily',10,365)">Chips ₹10 Daily</span>
-          <span class="pill" onclick="applyPreset('Cold Drink ₹25 Daily',25,365)">Cold Drink ₹25 Daily</span>
-          <span class="pill" onclick="applyPreset('Movie ₹300 Monthly',300,12)">Movie ₹300 Monthly</span>
-          <span class="pill" onclick="applyPreset('Canteen ₹150 Monthly',150,12)">Canteen ₹150 Monthly</span>
-          <span class="pill" onclick="applyPreset('Taxi ₹100 Weekly',100,52)">Taxi ₹100 Weekly</span>
+        <div class="preset-buttons">
+          <button onclick="prefill('Coffee ☕',60,365,'spend')">Coffee ₹60/day</button>
+          <button onclick="prefill('Chips 🍟',10,365,'spend')">Chips ₹10/day</button>
+          <button onclick="prefill('Movie 🎬',300,12,'spend')">Movie ₹300/month</button>
+          <button onclick="prefill('College Fund 🎓',50000,1,'save')">College ₹50k/year</button>
         </div>
       </div>
 
-      <!-- Right: Chart + Result -->
-      <div class="card results">
-        <h3 class="center" style="color:var(--ink)">Result</h3>
+      <!-- Right: Chart -->
+      <div class="card">
         <canvas id="resultCanvas"></canvas>
-        <div id="summary" class="center" style="margin-top:8px;color:#0c1f33;font-weight:700"></div>
-        <div id="calculation" class="card calc" style="margin-top:12px;background:#f6f9ff"></div>
-        <div id="emoji" class="center" style="font-size:2rem;margin-top:8px">🤔</div>
+        <div id="message"></div>
+        <div id="calculation"></div>
+        <div id="emoji"></div>
       </div>
     </div>
+  </section>
 
-    <footer>Smart Scan | CBSE Skill Expo | DPSG</footer>
-  </div>
+  <footer style="text-align:center; padding:20px; margin-top:30px; background:#f1f1f1; color:#333;">
+    Smart Scan | CBSE Skill Expo | DPSG
+  </footer>
 
-<script>
-  // ====== Three Jars animation on view ======
-  const jarObserver = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        e.target.querySelectorAll('.fill').forEach((f,i)=>{
-          f.classList.add('jar-animate');
-          // stagger heights for variety
-          const heights = [45,60,85]; // %
-          f.style.height = heights[i%3] + '%';
-        });
-        jarObserver.unobserve(e.target);
+  <script>
+    let chart;
+
+    // prefill form
+    function prefill(title, amount, freq, type) {
+      document.getElementById("title").value = title;
+      document.getElementById("amount").value = amount;
+      document.getElementById("freq").value = freq;
+      document.getElementById("type").value = type;
+      calculate();
+    }
+
+    function calculate() {
+      const type = document.getElementById("type").value;
+      const title = document.getElementById("title").value;
+      const amount = parseFloat(document.getElementById("amount").value);
+      const freq = parseInt(document.getElementById("freq").value);
+      const years = parseInt(document.getElementById("years").value);
+      const rate = 0.07;
+
+      const yearly = type === "spend" ? amount * freq : amount;
+      const future = yearly * ((Math.pow(1 + rate, years) - 1) / rate);
+
+      document.getElementById("message").innerHTML = 
+        type === "spend" 
+        ? `If you invested instead of spending <b>₹${yearly.toLocaleString('en-IN')}</b> yearly, in ${years} years you'd have <span style="color:#2a5298">₹${future.toLocaleString('en-IN')}</span>.`
+        : `Your saving of <b>₹${yearly.toLocaleString('en-IN')}</b> yearly will grow to <span style="color:#00b894">₹${future.toLocaleString('en-IN')}</span> in ${years} years!`;
+
+      document.getElementById("emoji").innerText = type === "spend" ? "🤔" : "🎉";
+
+      // Detailed calculation
+      document.getElementById("calculation").innerHTML = `
+        <p><b>Calculation:</b><br>
+        • Yearly = ₹${yearly}<br>
+        • Years = ${years}<br>
+        • Rate = ${(rate*100).toFixed(1)}%<br>
+        • FV = ${yearly} × ((1+${rate})^${years} - 1)/${rate}<br>
+        • Final Value = ₹${future.toLocaleString('en-IN')}
+        </p>
+      `;
+
+      // Chart
+      const ctx = document.getElementById("resultCanvas").getContext("2d");
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: ["Yearly", `After ${years} yrs`],
+          datasets: [{
+            data: [yearly, future],
+            backgroundColor: type === "spend" ? ["#ff7675","#55efc4"] : ["#74b9ff","#ffeaa7"],
+            borderRadius: 8
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display:false } }, scales: { y: { beginAtZero: true } } }
+      });
+    }
+
+    // Prefill from QR code (URL params)
+    function getParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+    window.onload = () => {
+      if (getParam("title")) {
+        document.getElementById("title").value = getParam("title");
+        document.getElementById("amount").value = getParam("amount");
+        document.getElementById("freq").value = getParam("freq");
+        document.getElementById("type").value = getParam("type");
+        document.getElementById("years").value = getParam("years") || 25;
+        calculate();
       }
-    })
-  }, {threshold:0.3});
-  jarObserver.observe(document.getElementById('jarGrid'));
-
-  // ====== Calculator logic ======
-  let chart;
-  const rate = 0.07; // 7% default
-
-  function toggleForm(){
-    const type = document.getElementById('type').value;
-    document.getElementById('spendFields').style.display = type==='spend'?'block':'none';
-    document.getElementById('saveFields').style.display  = type==='save' ?'block':'none';
-  }
-
-  function applyPreset(title,amount,freq){
-    document.getElementById('type').value='spend';
-    toggleForm();
-    document.getElementById('title').value=title;
-    document.getElementById('amount').value=amount;
-    document.getElementById('freq').value=freq;
-    // sync years sliders
-    const y = document.getElementById('years').value;
-    document.getElementById('yearsSave').value=y;
-    document.getElementById('yearLabelSave').innerText=y;
-    calculate();
-  }
-
-  function calculate(){
-    const type = document.getElementById('type').value;
-
-    // years unified across spend/save sliders
-    const years = type==='spend'
-      ? parseInt(document.getElementById('years').value)
-      : parseInt(document.getElementById('yearsSave').value);
-
-    // keep labels in sync
-    document.getElementById('years').value = years;
-    document.getElementById('yearsSave').value = years;
-    document.getElementById('yearLabel').innerText = years;
-    document.getElementById('yearLabelSave').innerText = years;
-
-    let yearly, title;
-    let simpleContributionText = '';
-
-    if(type==='spend'){
-      title = document.getElementById('title').value || 'Expense';
-      const amount = parseFloat(document.getElementById('amount').value)||0;
-      const freq   = parseInt(document.getElementById('freq').value);
-      yearly = amount * freq;
-      simpleContributionText = `${amount} × ${freq} × ${years} = ${(yearly*years).toLocaleString('en-IN')} (simple contribution)`;
-    }else{
-      title  = document.getElementById('saveTitle').value || 'Saving';
-      yearly = parseFloat(document.getElementById('saveAmount').value)||0;
-      simpleContributionText = `Yearly saving × years = ${(yearly*years).toLocaleString('en-IN')}`;
-    }
-
-    const total   = yearly * years;
-    const future  = yearly * ((Math.pow(1+rate,years)-1) / rate);
-
-    // Summary
-    document.getElementById('summary').innerHTML =
-      `Total contributed over ${years} years: <b>₹${total.toLocaleString('en-IN')}</b><br>`+
-      `Future value at 7% p.a.: <b>₹${future.toLocaleString('en-IN')}</b>`;
-
-    // Calculation detail
-    document.getElementById('calculation').innerHTML = `
-      <b>Calculation details</b><br>
-      • Yearly contribution (P): ₹${yearly.toLocaleString('en-IN')}<br>
-      • Years (t): ${years}<br>
-      • Rate (r): ${(rate*100).toFixed(1)}% per year<br>
-      • ${simpleContributionText}<br>
-      • Formula: FV = P × ((1 + r)<sup>t</sup> – 1) ÷ r<br>
-      • Substitution: FV = ${yearly} × ((1 + ${rate})<sup>${years}</sup> – 1) ÷ ${rate}<br>
-      • Final Value: <b>₹${future.toLocaleString('en-IN')}</b>
-    `;
-
-    // Emoji
-    document.getElementById('emoji').innerText = (type==='spend') ? '🤔' : '🎉';
-
-    // Chart
-    const ctx = document.getElementById('resultCanvas').getContext('2d');
-    if(chart) chart.destroy();
-    chart = new Chart(ctx, {
-      type:'bar',
-      data:{
-        labels:['Total contributed','Future value'],
-        datasets:[{
-          data:[total,future],
-          backgroundColor: (type==='spend') ? ['#ffcec2','#cfe8ff'] : ['#bff3e9','#ffe9bf'],
-          borderRadius:8
-        }]
-      },
-      options:{
-        responsive:true,
-        plugins:{legend:{display:false}},
-        scales:{y:{beginAtZero:true}}
-      }
-    });
-  }
-
-  // ====== QR Prefill from URL ======
-  function getParamsPrefill(){
-    const params = new URLSearchParams(window.location.search);
-    if(!params.has('type')) return;
-
-    const type = params.get('type');
-    document.getElementById('type').value = type || 'spend';
-    toggleForm();
-
-    if(type==='spend'){
-      if(params.has('title'))  document.getElementById('title').value  = decodeURIComponent(params.get('title'));
-      if(params.has('amount')) document.getElementById('amount').value = params.get('amount');
-      if(params.has('freq'))   document.getElementById('freq').value   = params.get('freq');
-    }else{
-      if(params.has('title'))  document.getElementById('saveTitle').value  = decodeURIComponent(params.get('title'));
-      if(params.has('amount')) document.getElementById('saveAmount').value = params.get('amount');
-    }
-
-    if(params.has('years')){
-      const y = params.get('years');
-      document.getElementById('years').value = y;
-      document.getElementById('yearsSave').value = y;
-      document.getElementById('yearLabel').innerText = y;
-      document.getElementById('yearLabelSave').innerText = y;
-    }
-
-    // Auto run
-    calculate();
-  }
-
-  // Init
-  window.addEventListener('DOMContentLoaded', ()=>{
-    toggleForm();
-    getParamsPrefill();
-    // first draw
-    calculate();
-  });
-</script>
+    };
+  </script>
 </body>
 </html>
